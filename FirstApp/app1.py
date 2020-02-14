@@ -1,16 +1,33 @@
 import json
-import difflib
+from difflib import get_close_matches
 
+data = json.load(open("data.json"))
 
-iword = input("Enter word: ")
-words = json.load(open("data.json"))
+def find_word(word):
+    word = word.lower()
 
-def search_key(search_val):
-    search_val = search_val.lower()
-    if search_val in words:
-        return(words[search_val])
+    if word in data:
+        return data[word]
+    elif word.title() in data:
+        return data[word.title()]
+    elif word.upper() in data:
+        return data[word.upper()]
+    elif len(get_close_matches(word, data.keys(), n=1)) > 0:
+        print("Did you mean %s?" % get_close_matches(word, data.keys(), n=1)[0])
+        response = input("Type Y for yes or N for no: ")
+        if response == "Y":
+            return data[get_close_matches(word, data.keys())[0]]
+        else:
+            return "Word doesn't exist, please double check it!"
     else:
-        dym = get_close_match(search_val, words.keys(), n=1)
-        return f"Did you mean {dym}? Y or N?:"
+        return "Word doesn't exist, please double check it!"
 
-print(search_key(iword))
+word = input("Please enter word: ")
+
+output = find_word(word)
+
+if type(output) == list:
+    for item in output:
+        print(item)
+else:
+    print(output)
